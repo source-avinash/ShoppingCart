@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class DailyshopperApplication {
 
 	public static void main(String[] args) {
+
 		SpringApplication.run(DailyshopperApplication.class, args);
 	}
 

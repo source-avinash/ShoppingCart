@@ -3,13 +3,11 @@ package com.dailyshopper.service.product;
 import java.util.List;
 import java.util.Optional;
 
+import com.dailyshopper.exceptions.ResourceNotFoundException;
 import com.dailyshopper.repository.CategoryRepository;
 import com.dailyshopper.requests.AddProductRequest;
 import com.dailyshopper.requests.UpdateProductRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.dailyshopper.exceptions.ProductNotFoundException;
 import com.dailyshopper.model.Category;
 import com.dailyshopper.model.Product;
 import com.dailyshopper.repository.ProductRepository;
@@ -17,9 +15,8 @@ import com.dailyshopper.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
 
-
-@Service
 @RequiredArgsConstructor
+@Service
 public class ProductService implements IProductService{
 
 
@@ -54,16 +51,16 @@ public class ProductService implements IProductService{
 		);
 	}
 
-	private Product updateProduct(UpdateProductRequest request, Long pid) {
+	public Product updateProduct(UpdateProductRequest request, Long productId) {
 
-		return productRepository.findById(pid)
-				.map(existingProduct-> updateExistingProduct(existingProduct, request))
+		return productRepository.findById(productId)
+				.map(existingProduct-> updateExistingProduct(request, existingProduct))
 				.map(productRepository::save)
-				.orElseThrow(()->new ProductNotFoundException("Product not found!"));
+				.orElseThrow(()->new ResourceNotFoundException("Product not found!"));
 
 	}
 
-	private Product updateExistingProduct(Product existingProduct, UpdateProductRequest request) {
+	private Product updateExistingProduct(UpdateProductRequest request, Product existingProduct) {
 
 		existingProduct.setName(request.getName());
 		existingProduct.setBrand(request.getBrand());
@@ -78,25 +75,21 @@ public class ProductService implements IProductService{
 	}
 
 	@Override
-	public Product getProductById(long id) {
+	public Product getProductById(Long id) {
 		// TODO Auto-generated method stub
 		return productRepository.findById(id)
-				.orElseThrow(()-> new ProductNotFoundException("Product Not Found!"));
+				.orElseThrow(()-> new ResourceNotFoundException("Product Not Found!"));
 	}
 
+
 	@Override
-	public void deleteProductById(long id) {
+	public void deleteProductById(Long id) {
 		// TODO Auto-generated method stub
 		productRepository.findById(id).ifPresentOrElse(productRepository :: delete
-				, ()-> {throw new ProductNotFoundException("Product Not Found!");});
+				, ()-> {throw new ResourceNotFoundException("Product Not Found!");});
 		
 	}
 
-	@Override
-	public void updateProduct(Product product, long productId) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public List<Product> getAllProducts() {
@@ -105,14 +98,14 @@ public class ProductService implements IProductService{
 	}
 
 	@Override
-	public List<Product> getProdutsByCategory(String category) {
+	public List<Product> getProductsByCategory(String category) {
 		// TODO Auto-generated method stub
 		return productRepository.findByCategoryName(category);	}
 
 	@Override
-	public List<Product> getProdutsByBrand(String brand) {
+	public List<Product> getProductsByBrand(String brand) {
 		// TODO Auto-generated method stub
-		return productRepository.findByBrandName(brand);
+		return productRepository.findByBrand(brand);
 	}
 
 	@Override
@@ -124,7 +117,7 @@ public class ProductService implements IProductService{
 	@Override
 	public List<Product> getProductsByName(String name) {
 		// TODO Auto-generated method stub
-		return null;
+		return productRepository.findByName(name);
 	}
 
 	@Override
@@ -134,7 +127,7 @@ public class ProductService implements IProductService{
 	}
 
 	@Override
-	public long countProductsByBrandAndName(String brand, String name) {
+	public Long countProductsByBrandAndName(String brand, String name) {
 		// TODO Auto-generated method stub
 		return productRepository.countByBrandAndName(brand, name);
 	}

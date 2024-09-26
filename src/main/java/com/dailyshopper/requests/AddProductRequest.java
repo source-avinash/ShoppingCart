@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Data
 public class AddProductRequest {
 
-    private long id;
+    private Long id;
     private String name;
     private String brand;
     private BigDecimal price;

@@ -10,8 +10,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+
 @RequiredArgsConstructor
+@Service
 public class CategoryService implements ICategoryService {
 
     private final CategoryRepository categoryRepository;

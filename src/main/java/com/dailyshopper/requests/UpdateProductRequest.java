@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 public class UpdateProductRequest {
 
 
-    private long id;
+    private Long id;
     private String name;
     private String brand;
     private BigDecimal price;
