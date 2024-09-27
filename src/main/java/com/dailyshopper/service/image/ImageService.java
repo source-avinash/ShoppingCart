@@ -5,7 +5,7 @@ import com.dailyshopper.exceptions.ResourceNotFoundException;
 import com.dailyshopper.model.Image;
 import com.dailyshopper.model.Product;
 import com.dailyshopper.repository.ImageRepository;
-import com.dailyshopper.service.product.ProductService;
+import com.dailyshopper.service.product.IProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,74 +16,74 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class ImageService implements IImageService {
-
     private final ImageRepository imageRepository;
-    private final ProductService productService;
+    private final IProductService productService;
+
 
     @Override
-    public Image getImage(Long id) {
+    public Image getImageById(Long id) {
         return imageRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("No image found with id "+ id ));
+                .orElseThrow(() -> new ResourceNotFoundException("No image found with id: " + id));
     }
 
     @Override
-    public void deleteImage(Long id) {
-        imageRepository.findById(id)
-                .ifPresentOrElse(imageRepository::delete,
-                        () -> {throw new ResourceNotFoundException("No image found with id "+ id );});
+    public void deleteImageById(Long id) {
+        imageRepository.findById(id).ifPresentOrElse(imageRepository::delete, () -> {
+            throw new ResourceNotFoundException("No image found with id: " + id);
+        });
+
     }
 
     @Override
-    public List<ImageDto> saveImages(List<MultipartFile> files, Long productId) {
+    public List<ImageDto> saveImages( Long productId,   List<MultipartFile> files) {
         Product product = productService.getProductById(productId);
+
         List<ImageDto> savedImageDto = new ArrayList<>();
         for (MultipartFile file : files) {
-
-            try{
+            try {
                 Image image = new Image();
                 image.setFileName(file.getOriginalFilename());
                 image.setFileType(file.getContentType());
                 image.setImage(new SerialBlob(file.getBytes()));
                 image.setProduct(product);
 
-                String buildDownload = "/api/v1/images/download/";
-                String downloadUrl = buildDownload + image.getFileName();
-                image.setDownloadurl(downloadUrl);
+                String buildDownloadUrl = "/api/v1/images/image/download/";
+                String downloadUrl = buildDownloadUrl+image.getId();
+                image.setDownloadUrl(downloadUrl);
                 Image savedImage = imageRepository.save(image);
-                savedImage.setDownloadurl(buildDownload + savedImage.getId());
+
+                savedImage.setDownloadUrl(buildDownloadUrl+savedImage.getId());
                 imageRepository.save(savedImage);
 
                 ImageDto imageDto = new ImageDto();
-                imageDto.setImageId(savedImage.getId());
-                imageDto.setImageName(savedImage.getFileName());
-                imageDto.setImageUrl(savedImage.getDownloadurl());
+                imageDto.setId(savedImage.getId());
+                imageDto.setFileName(savedImage.getFileName());
+                imageDto.setDownloadUrl(savedImage.getDownloadUrl());
                 savedImageDto.add(imageDto);
 
-
-            } catch(IOException |  SQLException e){
-               throw new RuntimeException(e.getMessage());
+            }   catch(IOException | SQLException e){
+                throw new RuntimeException(e.getMessage());
             }
         }
-
         return savedImageDto;
     }
 
+
+
     @Override
     public void updateImage(MultipartFile file, Long imageId) {
-
-        Image image = getImage(imageId);
-
+        Image image = getImageById(imageId);
         try {
-
             image.setFileName(file.getOriginalFilename());
+            image.setFileType(file.getContentType());
             image.setImage(new SerialBlob(file.getBytes()));
             imageRepository.save(image);
         } catch (IOException | SQLException e) {
-            throw new ResourceNotFoundException(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
+
     }
 }

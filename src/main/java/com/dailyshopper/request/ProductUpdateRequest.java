@@ -1,15 +1,12 @@
-package com.dailyshopper.requests;
+package com.dailyshopper.request;
 
 import com.dailyshopper.model.Category;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
-
 @Data
-public class UpdateProductRequest {
-
-
+public class ProductUpdateRequest {
     private Long id;
     private String name;
     private String brand;
@@ -18,4 +15,3 @@ public class UpdateProductRequest {
     private String description;
     private Category category;
 }
-

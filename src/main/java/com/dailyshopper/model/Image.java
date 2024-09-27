@@ -1,22 +1,12 @@
 package com.dailyshopper.model;
 
-import java.sql.Blob;
-
-import org.hibernate.annotations.ManyToAny;
-
-import jakarta.annotation.Generated;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Blob;
 
 @Getter
 @Setter
@@ -24,20 +14,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 public class Image {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String fileName;
 	private String fileType;
-	
+
 	@Lob
 	private Blob image;
-	
-	private String downloadurl;
-	
+	private String downloadUrl;
+
 	@ManyToOne
 	@JoinColumn(name = "product_id")
 	private Product product;
-	
 }
