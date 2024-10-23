@@ -1,28 +1,39 @@
 package com.dailyshopper.security.jwt;
 
 import com.dailyshopper.security.user.ShopUserDetails;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-public class jwtUtils {
 
+@Component
+public class JwtUtils {
+
+    @Value("${auth.token.jwtSecret}")
     private String jwtSecret;
+
+    @Value("${auth.token.expirationInMils}")
     private int expirationTime;
 
 
     public String generateTokenForUser(Authentication authentication){
+
+        //Getting the logged in user
         ShopUserDetails userPrincipal = (ShopUserDetails) authentication.getPrincipal();
+
+        //Getting roles of the logged in user
         List<String> roles = userPrincipal.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority).toList();
+
 
         return Jwts.builder().setSubject(userPrincipal.getEmail())
                 .claim("id", userPrincipal.getId())
@@ -36,5 +47,33 @@ public class jwtUtils {
     private Key key(){
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
+
+    public String getUsernameFromToken(String token){
+
+            return Jwts.parserBuilder()
+                    .setSigningKey(key())
+                    .build()
+                    .parseClaimsJwt(token)
+                    .getBody()
+                    .getSubject();
+    }
+
+    public boolean validateToken(String token){
+
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(key())
+                    .build()
+                    .parseClaimsJwt(token);
+            return true;
+
+        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
+            throw new JwtException(e.getMessage());
+        }
+    }
+
+
+
+
 
 }

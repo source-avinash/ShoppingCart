@@ -8,12 +8,14 @@ import com.dailyshopper.response.ApiResponse;
 import com.dailyshopper.service.cart.CartItemService;
 import com.dailyshopper.service.cart.CartService;
 import com.dailyshopper.service.user.IUserService;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RequiredArgsConstructor
 @Controller
@@ -31,7 +33,7 @@ public class CartItemController {
                                                       @RequestParam Integer quantity){
 
         try {
-                User user = userService.getUserById(1L);
+                User user = userService.getAuthenticatedUser();
                 Cart cart = cartService.initializeNewCart(user);
 
 
@@ -39,6 +41,8 @@ public class CartItemController {
             return ResponseEntity.ok(new ApiResponse("success", null));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body( new ApiResponse("error", e.getMessage()));
+        } catch(JwtException e){
+            return ResponseEntity.status(UNAUTHORIZED).body( new ApiResponse("error", e.getMessage()));
         }
 
     }

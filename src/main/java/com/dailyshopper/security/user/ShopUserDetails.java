@@ -25,7 +25,7 @@ public class ShopUserDetails implements UserDetails {
     private Collection<GrantedAuthority> authorities;
 
     public static ShopUserDetails buildUserDetails(User user){
-        List<GrantedAuthority> authorities = user.getRole()
+        List<GrantedAuthority> authorities = user.getRoles()
                 .stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toList());
